@@ -1,26 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { Testimonial, TestimonialDocument } from './schema/testimonial.schema';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class TestimonialService {
-  create(createTestimonialDto: CreateTestimonialDto) {
-    return 'This action adds a new testimonial';
+  constructor(
+    @InjectModel(Testimonial.name)
+    private readonly testimonialModel: Model<TestimonialDocument>,
+  ) {}
+
+  async create(
+    createTestimonialDto: CreateTestimonialDto,
+  ): Promise<TestimonialDocument> {
+    return await this.testimonialModel.create(createTestimonialDto);
   }
 
-  findAll() {
-    return `This action returns all testimonial`;
+  async findAll(): Promise<TestimonialDocument[]> {
+    return await this.testimonialModel.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} testimonial`;
+  async findOne(id: string): Promise<TestimonialDocument> {
+    return await this.testimonialModel.findById(id);
   }
 
-  update(id: number, updateTestimonialDto: UpdateTestimonialDto) {
-    return `This action updates a #${id} testimonial`;
+  async update(
+    id: string,
+    updateTestimonialDto: UpdateTestimonialDto,
+  ): Promise<TestimonialDocument> {
+    return await this.testimonialModel.findByIdAndUpdate(
+      id,
+      updateTestimonialDto,
+      { new: true },
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} testimonial`;
+  async remove(id: string): Promise<TestimonialDocument> {
+    return await this.testimonialModel.findByIdAndDelete(id);
   }
 }

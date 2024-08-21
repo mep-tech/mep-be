@@ -22,7 +22,10 @@ export class UserAuthGuard implements CanActivate {
 
     try {
       const payload = await this.authService.decodeJwtToken(token);
-      console.log(payload, '**payload**');
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (payload.exp < currentTime) {
+        throw new HttpException('Token has expired', HttpStatus.UNAUTHORIZED);
+      }
       request['user'] = payload;
     } catch {
       throw new HttpException('Invalid signin token', HttpStatus.UNAUTHORIZED);

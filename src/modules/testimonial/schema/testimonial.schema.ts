@@ -13,11 +13,11 @@ export class Testimonial {
   public names: string;
 
   @Prop({
-    index: true,
     trim: true,
+    required: false,
     type: String,
   })
-  public contact: string;
+  public message: string;
 
   @Prop({
     trim: true,
