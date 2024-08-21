@@ -10,6 +10,10 @@ export class AdminService {
     private readonly adminModel: Model<AdminDocument>,
   ) {}
 
+  async findById(id: string): Promise<AdminDocument | null> {
+    return await this.adminModel.findById(id);
+  }
+
   async findAdminByUserNameOrEmail(
     usernameOrEmail: string,
   ): Promise<AdminDocument | null> {
@@ -18,8 +22,18 @@ export class AdminService {
     });
   }
 
+  async findByEmail(email: string): Promise<AdminDocument | null> {
+    return await this.adminModel.findOne({ email });
+  }
+
   async findAdminById(id: string): Promise<AdminDocument | null> {
     return await this.adminModel.findById(id);
+  }
+
+  async update(id: string, data: any): Promise<AdminDocument | null> {
+    return await this.adminModel.findByIdAndUpdate(id, data, {
+      new: true,
+    });
   }
 
   async createMany(data: any[]): Promise<any[]> {

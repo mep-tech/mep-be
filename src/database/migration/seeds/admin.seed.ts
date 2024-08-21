@@ -33,7 +33,7 @@ export class AdminSeed {
       {
         names: 'Mep Test',
         username: 'test',
-        email: 'devgerard1001@gmail.com',
+        email: 'kiglance.rw@gmail.com',
         password: await this.passwordHelper.hashPassword(testPassword),
         role: 'admin',
         avatar:

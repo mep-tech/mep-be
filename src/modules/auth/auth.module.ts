@@ -5,11 +5,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtDynamicModule } from './jwt/jwt.module';
 import { PasswordHelper } from 'src/common/helpers/password.helper';
 import { AdminModule } from '../admin/admin.module';
+import { NodeMailerHelper } from 'src/common/helpers/nodemailer.helper';
 
 @Module({
   imports: [JwtDynamicModule.forRoot(), forwardRef(() => AdminModule)],
   controllers: [AuthController],
-  providers: [AuthService, PasswordHelper, ConfigService],
+  providers: [AuthService, PasswordHelper, NodeMailerHelper, ConfigService],
   exports: [AuthService],
 })
 export class AuthModule {}

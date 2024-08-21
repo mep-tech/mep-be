@@ -9,6 +9,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import configuration from 'config/configuration';
 import { MigrationModule } from './database/migration/migration.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MemberModule } from './modules/member/member.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
     AdminModule,
     AuthModule,
     MigrationModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],
