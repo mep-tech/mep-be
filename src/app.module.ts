@@ -3,7 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseConfigModule } from './database/mongoose.module';
 import { ConfigModule } from '@nestjs/config';
+import { TestimonialModule } from './modules/testimonial/testimonial.module';
+import { UserModule } from './modules/user/user.module';
+import { AdminModule } from './modules/admin/admin.module';
 import configuration from 'config/configuration';
+import { MigrationModule } from './database/migration/migration.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -12,6 +17,11 @@ import configuration from 'config/configuration';
       load: [configuration],
     }),
     MongooseConfigModule,
+    TestimonialModule,
+    UserModule,
+    AdminModule,
+    AuthModule,
+    MigrationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
