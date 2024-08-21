@@ -27,6 +27,13 @@ export class Testimonial {
   public company: string;
 
   @Prop({
+    trim: true,
+    required: false,
+    type: String,
+  })
+  public role: string; // role at the company
+
+  @Prop({
     required: false,
     sparse: true,
     trim: true,
