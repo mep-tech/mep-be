@@ -3,7 +3,7 @@ export const icons = {
     'https://res.cloudinary.com/dxjzkrofd/image/upload/v1724280766/mephalf_dz60yp.png',
   logoUrl:
     'https://res.cloudinary.com/dxjzkrofd/image/upload/v1724275009/logo_qzohu6.png',
-  linkedIconUrl:
+  linkedInIconUrl:
     'https://res.cloudinary.com/dxjzkrofd/image/upload/v1724276889/Vector_1_hmhzpw.png',
   instagramIconUrl:
     'https://res.cloudinary.com/dxjzkrofd/image/upload/v1724279009/Group_83_ei8wv1.png',
@@ -16,20 +16,17 @@ export const icons = {
 };
 
 export const links = {
-  home: '/',
-  login: '/login',
-  register: '/register',
-  forgotPassword: '/forgot-password',
-  resetPassword: '/reset-password',
-  profile: '/profile',
-  dashboard: '/dashboard',
-  logout: '/logout',
+  home: '',
+  contact: 'contact',
+  about: 'about',
+  login: 'admin/login',
+  resetPassword: 'reset-password',
 };
 
 export const media = {
-  linkedIn: 'https://www.linkedin.com/company/mep-consulting-engineers/',
-  twitter: 'https://twitter.com/mepconsulting',
-  facebook: 'https://www.facebook.com/mepconsultingengineers',
-  instagram: 'https://www.instagram.com/mepconsultingengineers/',
-  youtube: 'https://www.youtube.com/channel/UCm3V4lY2c3bR7x6mQa3c5hw',
+  linkedIn: 'https://www.linkedin.com',
+  twitter: 'https://twitter.com',
+  facebook: 'https://www.facebook.com',
+  instagram: 'https://www.instagram.com',
+  youtube: 'https://www.youtube.com/',
 };

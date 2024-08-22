@@ -14,7 +14,7 @@ import {
   Heading,
 } from '@react-email/components';
 import * as React from 'react';
-import { icons, media } from './assets/items';
+import { icons, links, media } from './assets/items';
 
 interface MepResetPasswordEmailProps {
   username?: string;
@@ -32,6 +32,7 @@ export const MepResetPasswordEmail = ({
       <Head />
       <Preview>Reset your password for your Mep account</Preview>
       <Body style={main}>
+        <Container></Container>
         <Container style={container}>
           <Section style={logo}>
             <Link href={`${clientUrl}`}>
@@ -75,18 +76,18 @@ export const MepResetPasswordEmail = ({
             <Text style={paragraph}>{resetPasswordLink}</Text>
             <Text style={paragraph}>
               If you don't want to change your password or didn't request this,
-              just ignore and delete this message.
+              just ignore or delete this message.
             </Text>
             <Text style={paragraph}>
               Still have questions? Please contact{' '}
-              <Link href={`${clientUrl}/contact`} style={link}>
+              <Link href={`${clientUrl}/${links.contact}`} style={link}>
                 Mep Support
               </Link>
             </Text>
             <Text style={paragraph}>
               Take care,
               <br />
-              Mep Support
+              Mep Support Team
             </Text>
           </Section>
         </Container>
@@ -99,7 +100,7 @@ export const MepResetPasswordEmail = ({
                   <Column>
                     <Link href={`${media.linkedIn}`}>
                       <Img
-                        src={icons.linkedIconUrl}
+                        src={icons.linkedInIconUrl}
                         width="20"
                         alt="Mep"
                         style={socialMediaIcon}

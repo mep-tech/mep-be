@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-export const passwordValidation = Joi.object({
+export const passwordChangeValidation = Joi.object({
   oldPwd: Joi.string().required().empty().min(6).max(40),
   newPwd: Joi.string().required().empty().min(6).max(40),
 });

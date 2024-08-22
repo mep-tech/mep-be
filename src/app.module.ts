@@ -10,6 +10,7 @@ import configuration from 'config/configuration';
 import { MigrationModule } from './database/migration/migration.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MemberModule } from './modules/member/member.module';
+import { CertificateModule } from './modules/certificate/certificate.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MemberModule } from './modules/member/member.module';
     AuthModule,
     MigrationModule,
     MemberModule,
+    CertificateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

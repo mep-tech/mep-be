@@ -1,14 +1,16 @@
 import { Type } from 'class-transformer';
 import { IsString, IsNotEmpty, IsDefined } from 'class-validator';
 
-export class ResetPasswordDto {
+export class UpdatePasswordDto {
   @IsString()
   @IsNotEmpty()
+  @IsDefined()
   @Type(() => String)
-  readonly oldPwd: string;
+  readonly pwd: string;
 
   @IsString()
   @IsNotEmpty()
+  @IsDefined()
   @Type(() => String)
-  readonly newPwd: string;
+  readonly confirmPwd: string;
 }

@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpException,
   HttpStatus,
   Param,
@@ -21,12 +20,15 @@ import { NodeMailerHelper } from 'src/common/helpers/nodemailer.helper';
 import { render } from '@react-email/components';
 import { PasswordForgotDto } from './dto/password-forgot.dto';
 import {
+  passwordChangeValidation,
   passwordForgotValidation,
   passwordResetValidation,
 } from './validations/password.validation';
 import MepResetPasswordEmail from 'template/forgort_password.template';
 import { AdminDocument } from '../admin/schema/admin.schema';
-import { UpdatePasswordDto } from './dto/password-update.dto';
+import { UpdatePasswordDto } from './dto/password-reset.dto';
+import { links } from 'template/assets/items';
+import { ChangePasswordDto } from './dto/password-change.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -93,7 +95,7 @@ export class AuthController {
         id: user.id,
       });
       const clientUrl = process.env.CLIENT_URL;
-      const resetPasswordLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+      const resetPasswordLink = `${process.env.CLIENT_URL}/${links.resetPassword}?token=${token}`;
       const subject = 'Reset Password';
       const html = render(
         MepResetPasswordEmail({
@@ -155,6 +157,44 @@ export class AuthController {
         statusCode: HttpStatus.OK,
         message: 'Password reset successfully',
         data: updatedPwd,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Internal Server Error',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch('change-password/:id')
+  @UsePipes(new CustomValidationPipe(passwordChangeValidation))
+  async changePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<IResponse<AdminDocument>> {
+    try {
+      const { oldPwd, newPwd } = changePasswordDto;
+
+      const user = await this.adminService.findById(id);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      const isCorrectPassword = await this.passwordHelper.comparePassword(
+        oldPwd,
+        user.password,
+      );
+      if (!isCorrectPassword) {
+        throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
+      }
+      const hashedPassword = await this.passwordHelper.hashPassword(newPwd);
+      const changedPwd = await this.adminService.update(user.id, {
+        password: hashedPassword,
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Password updated successfully',
+        data: changedPwd,
       };
     } catch (error) {
       throw new HttpException(
