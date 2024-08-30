@@ -25,7 +25,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { createTestimonialValidation } from './validations/testimonial.validation';
 import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Testimonial')
 @Controller('testimonial')
 export class TestimonialController {
   constructor(

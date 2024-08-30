@@ -18,13 +18,14 @@ export class AdminSeed {
   })
   async seeds(): Promise<void> {
     const adminPassword = this.configService.get<string>('SEED_ADMIN_PASSWORD');
-    const testPassword = this.configService.get<string>('SEED_TEST_PASSWORD');
+    const adminEmail = this.configService.get<string>('SEED_ADMIN_EMAIL');
+    const testPassword = this.configService.get<string>('SEED_ADMIN_PASSWORD');
 
     const data: any[] = [
       {
         names: 'Mep Admin',
         username: 'admin',
-        email: 'meperictric@gmail.com',
+        email: adminEmail,
         password: await this.passwordHelper.hashPassword(adminPassword),
         role: 'admin',
         avatar:

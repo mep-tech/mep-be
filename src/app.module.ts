@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import configuration from 'config/configuration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseConfigModule } from './database/mongoose.module';
-import { ConfigModule } from '@nestjs/config';
-import { TestimonialModule } from './modules/testimonial/testimonial.module';
-import { UserModule } from './modules/user/user.module';
-import { AdminModule } from './modules/admin/admin.module';
-import configuration from 'config/configuration';
 import { MigrationModule } from './database/migration/migration.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { MemberModule } from './modules/member/member.module';
+import { MongooseConfigModule } from './database/mongoose.module';
+import { ActivityModule } from './modules/activity/activity.module';
 import { CertificateModule } from './modules/certificate/certificate.module';
+import { GalleryModule } from './modules/gallery/gallery.module';
+import { MemberModule } from './modules/member/member.module';
+import { ProjectModule } from './modules/project/project.module';
+import { TestimonialModule } from './modules/testimonial/testimonial.module';
 
 @Module({
   imports: [
@@ -20,12 +20,12 @@ import { CertificateModule } from './modules/certificate/certificate.module';
     }),
     MongooseConfigModule,
     TestimonialModule,
-    UserModule,
-    AdminModule,
-    AuthModule,
     MigrationModule,
     MemberModule,
     CertificateModule,
+    ProjectModule,
+    GalleryModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -26,7 +26,7 @@ const fileFilter = (req: any, file: any, cb: any) => {
 
 const multerOptions = {
   storage,
-  limits: { fileSize: 4 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter,
 };
 

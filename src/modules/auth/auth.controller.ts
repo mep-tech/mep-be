@@ -106,7 +106,7 @@ export class AuthController {
       );
       try {
         await this.nodeMailerHelper.sendEmail(email, subject, html);
-      } catch (error) {
+      } catch {
         throw new HttpException(
           'Email delivery has failed, please check again your email address or try again later',
           HttpStatus.BAD_REQUEST,

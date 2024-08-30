@@ -4,9 +4,13 @@ import {
   HttpStatus,
   ExecutionContext,
   CanActivate,
+  applyDecorators,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AdminGuard } from './admin.guard';
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
@@ -38,4 +42,8 @@ export class UserAuthGuard implements CanActivate {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
+}
+
+export function AuthGuard() {
+  return applyDecorators(ApiBearerAuth(), UseGuards(UserAuthGuard, AdminGuard));
 }

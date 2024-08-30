@@ -19,7 +19,9 @@ import { AdminDocument } from './schema/admin.schema';
 import { multerOptions } from 'src/common/helpers/multer.helper';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('admin')
 export class AdminController {
   constructor(

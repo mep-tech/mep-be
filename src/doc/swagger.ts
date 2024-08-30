@@ -12,6 +12,7 @@ export default async function swaggerInit(app: NestApplication) {
       'This is the swagger documentation for the Mep Erictric platform APIS.',
     )
     .setVersion('0.0.1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

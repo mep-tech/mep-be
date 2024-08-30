@@ -25,7 +25,9 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { IResponse } from 'src/common/interface/response.interface';
 import { MemberDocument } from './schema/member.schema';
 import { MemberService } from './member.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Member')
 @Controller('member')
 export class MemberController {
   constructor(

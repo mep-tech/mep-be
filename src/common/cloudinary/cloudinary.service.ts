@@ -37,7 +37,15 @@ export class CloudinaryService {
     url: string,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     try {
-      const publicId = url.split('/').slice(-2).join('/').split('.')[0];
+      const publicId = 'mep/'.concat(
+        url
+          .split('/mep/')
+          .slice(1)
+          .join('/mep/')
+          .split('.')
+          .slice(0, -1)
+          .join('.'),
+      );
 
       if (!publicId) {
         throw new Error('Invalid URL');

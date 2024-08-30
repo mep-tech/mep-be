@@ -9,8 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_URI'),
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
       }),
       inject: [ConfigService],
     }),

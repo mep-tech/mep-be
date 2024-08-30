@@ -1,4 +1,5 @@
-export interface ImageObject {
-  imageId: string;
-  imageLink: string;
+export interface IImage {
+  url: string;
+  size: number;
+  mimetype: string;
 }
