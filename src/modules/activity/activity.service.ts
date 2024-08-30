@@ -46,7 +46,7 @@ export class ActivityService {
     return this.activityModel.deleteOne({ _id: id }).exec();
   }
 
-  async removeMany(ids: number[]): Promise<mongo.DeleteResult> {
+  async removeMany(ids: string[]): Promise<mongo.DeleteResult> {
     return this.activityModel.deleteMany({ _id: { $in: ids } }).exec();
   }
 }

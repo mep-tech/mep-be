@@ -72,13 +72,24 @@ export class ActivityController {
   }
 
   @Get()
-  findAll(): Promise<ActivityDocument[]> {
-    return this.activityService.findAll();
+  async findAll(): Promise<IResponse<ActivityDocument[]>> {
+    const data = await this.activityService.findAll()
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Fetched activities successfully',
+      data
+    }
   }
 
   @Get(':id')
   @UsePipes(ParamObjectIdValidationPipe)
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<ActivityDocument>  {
+    const activity = await this.activityService.findOne(id)
+    if (!activity) {
+      throw new HttpException(`Activity with id ${id} not found`, HttpStatus.NOT_FOUND)
+    }
+
     return this.activityService.findOne(id);
   }
 

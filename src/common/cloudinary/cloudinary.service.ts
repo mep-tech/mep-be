@@ -5,7 +5,7 @@ import * as fs from 'fs';
 @Injectable()
 export class CloudinaryService {
   async uploadImage(
-    file: Express.Multer.File,
+    file: Express.Multer.File | { path?: string, buffer?: any },
     folder: string = '',
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
