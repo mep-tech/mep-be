@@ -10,12 +10,13 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import mongoose from 'mongoose';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
@@ -40,6 +41,7 @@ import { updateProjectGalleryValidation } from './validations/updateProjectGalle
 import { GalleryService } from '../gallery/gallery.service';
 import { ProjectImageDocument } from '../gallery/schemas/Projectimage.schema';
 import { ActivityDocument } from '../activity/schemas/activity.schema';
+import { projectImagesDirectory } from '../gallery/gallery.controller';
 
 @ApiTags('Project')
 @Controller('project')
@@ -49,18 +51,23 @@ export class ProjectController {
     private readonly cloudinaryService: CloudinaryService,
     private readonly activityService: ActivityService,
     private readonly galleryService: GalleryService
-  ) {}
+  ) { }
 
   @Post()
   @ApiConsumes('multipart/form-data')
   @AuthGuard()
-  @UseInterceptors(new ArrayInterceptor(['activities']))
-  @UseInterceptors(FilesInterceptor('gallery', undefined, multerOptions))
+  @UseInterceptors(
+    new ArrayInterceptor(['activities']),
+    FileFieldsInterceptor([{ name: 'image' }, { name: 'gallery' }], multerOptions)
+  )
   @UsePipes(new CustomValidationPipe(createProjectValidation))
-  async create(
+  async create (
     @Body() createProjectDto: CreateProjectDto,
-    @UploadedFiles() gallery: Express.Multer.File[],
+    @UploadedFiles() files: { image: Express.Multer.File[], gallery: Express.Multer.File[] },
   ): Promise<IResponse<ProjectDocument>> {
+    const { image: images, gallery = [] } = files;
+    const image = images[0]
+
     const {
       name,
       projectOwner,
@@ -75,11 +82,10 @@ export class ProjectController {
     if (conflictProject) {
       throw new HttpException(`Project with name '${name}' already exists`, HttpStatus.CONFLICT);
     }
-
-    const uploadedGallery = await Promise.all(
-      gallery.map(async (multerFile) => {
+    const [uploadedImage, ...uploadedGallery] = await Promise.all(
+      [image, ...gallery].map(async (multerFile) => {
         const file = await this.cloudinaryService
-          .uploadImage(multerFile, 'project-gallery')
+          .uploadImage(multerFile, projectImagesDirectory)
           .catch((err) => {
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
           });
@@ -94,6 +100,7 @@ export class ProjectController {
     const project = await (await this.projectService.create(
       {
         name,
+        image: uploadedImage.url,
         projectOwner,
         projectOwnerContact,
         startDate,
@@ -115,7 +122,7 @@ export class ProjectController {
 
   @Get()
   @UseInterceptors(PaginationInterceptor)
-  async findAll(
+  async findAll (
     @Query(new ValidationPipe({ transform: true })) pagination: PaginationDto
   ): Promise<IResponse<ProjectDocument[]>> {
     const data = await this.projectService.findAll(null, pagination);
@@ -128,7 +135,7 @@ export class ProjectController {
 
   @Get(':id')
   @UsePipes(ParamObjectIdValidationPipe)
-  async findOne(@Param('id') id: string): Promise<IResponse<ProjectDocument>> {
+  async findOne (@Param('id') id: string): Promise<IResponse<ProjectDocument>> {
     const project = await this.projectService.findOne(id);
     if (!project) {
       throw new HttpException(`Project with id '${id}' not found`, HttpStatus.NOT_FOUND);
@@ -142,20 +149,36 @@ export class ProjectController {
     };
   }
 
-  @Patch(':id')
+  @Put(':id')
   @AuthGuard()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image', multerOptions))
   @UsePipes(ParamObjectIdValidationPipe)
   @UsePipes(new CustomValidationPipe(updateProjectValidation))
-  async update(@Param('id') id: string, @Body() body: UpdateProjectDto): Promise<IResponse<ProjectDocument>> {
+  async update (
+    @Param('id') id: string,
+    @Body() body: UpdateProjectDto,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<IResponse<ProjectDocument>> {
     const { name } = body;
 
     const project = await this.projectService.findOne(id);
     if (!project) {
       throw new HttpException(`Project with id '${id}' not found`, HttpStatus.NOT_FOUND);
     }
-    const conflictProject = (await this.projectService.findAll({ $and: [{ name }, {name: { $ne: project.name }}]}))[0]
+    const conflictProject = (await this.projectService.findAll({ $and: [{ name }, { name: { $ne: project.name } }] }))[0]
     if (conflictProject && conflictProject._id.toString() !== id) {
       throw new HttpException(`Project with name '${name}' already exists`, HttpStatus.CONFLICT);
+    }
+
+    if (image) {
+      await this.cloudinaryService.removeImage(project.image)
+      const uploadedImage = await this.cloudinaryService
+        .uploadImage(image, projectImagesDirectory)
+        .catch((err) => {
+          throw new HttpException(err, HttpStatus.BAD_REQUEST);
+        });
+      body.image = uploadedImage.secure_url;
     }
 
     await this.projectService.update(id, body)
@@ -169,7 +192,7 @@ export class ProjectController {
   @Delete(':id')
   @AuthGuard()
   @UsePipes(ParamObjectIdValidationPipe)
-  async remove(@Param('id') id: string): Promise<IResponse> {
+  async remove (@Param('id') id: string): Promise<IResponse> {
     const project = await this.projectService.findOne(id);
     if (!project) {
       throw new HttpException(`Project with id '${id}' not found`, HttpStatus.NOT_FOUND);
@@ -186,7 +209,7 @@ export class ProjectController {
   @Get(':id/activities')
   @UsePipes(ParamObjectIdValidationPipe)
   @UseInterceptors(PaginationInterceptor)
-  async fetchProjectActivities(
+  async fetchProjectActivities (
     @Param('id') id: string,
     @Query(new ValidationPipe({ transform: true })) pagination: PaginationDto
   ): Promise<IResponse<ActivityDocument[]>> {
@@ -195,7 +218,7 @@ export class ProjectController {
       throw new HttpException(`Project with id '${id}' not found`, HttpStatus.NOT_FOUND);
     }
 
-    const data = await this.activityService.findAll({ _id: { $in: project.activities }}, pagination)
+    const data = await this.activityService.findAll({ _id: { $in: project.activities } }, pagination)
     return {
       statusCode: HttpStatus.OK,
       message: 'Project activities fetched successfully',
@@ -206,7 +229,7 @@ export class ProjectController {
   @Put(':id/activities')
   @AuthGuard()
   @UsePipes(ParamObjectIdValidationPipe, new CustomValidationPipe(updateProjectActivitiesValidation))
-  async updateProjectActivities(@Param('id') id: string, @Body() body: updateProjectActivitiesDto): Promise<IResponse<ProjectDocument>> {
+  async updateProjectActivities (@Param('id') id: string, @Body() body: updateProjectActivitiesDto): Promise<IResponse<ProjectDocument>> {
     const { activities } = body;
 
     const project = await this.projectService.findOne(id);
@@ -215,7 +238,7 @@ export class ProjectController {
     }
 
     console.log("activities", activities)
-    const fetchedActivities = await this.activityService.findAll({ _id: { $in: activities }})
+    const fetchedActivities = await this.activityService.findAll({ _id: { $in: activities } })
     if (fetchedActivities.length < activities.length) {
       const notFoundActivities = [...activities]
       console.log("notFoundActivities", notFoundActivities)
@@ -241,7 +264,7 @@ export class ProjectController {
   @Get(':id/gallery')
   @UsePipes(ParamObjectIdValidationPipe)
   @UseInterceptors(PaginationInterceptor)
-  async fetchProjectGallery(
+  async fetchProjectGallery (
     @Param('id') id: string,
     @Query(new ValidationPipe({ transform: true })) pagination: PaginationDto
   ): Promise<IResponse<ProjectImageDocument[]>> {
@@ -250,7 +273,7 @@ export class ProjectController {
       throw new HttpException(`Project with id '${id}' not found`, HttpStatus.NOT_FOUND);
     }
 
-    const data = await this.galleryService.findAll({ _id: { $in: project.gallery }}, pagination)
+    const data = await this.galleryService.findAll({ _id: { $in: project.gallery } }, pagination)
     return {
       statusCode: HttpStatus.OK,
       message: 'Project gallery fetched successfully',
@@ -261,7 +284,7 @@ export class ProjectController {
   @Put(':id/gallery')
   @AuthGuard()
   @UsePipes(ParamObjectIdValidationPipe, new CustomValidationPipe(updateProjectGalleryValidation))
-  async updateProjectGallery(@Param('id') id: string, @Body() body: updateProjectGalleryDto): Promise<IResponse<ProjectDocument>> {
+  async updateProjectGallery (@Param('id') id: string, @Body() body: updateProjectGalleryDto): Promise<IResponse<ProjectDocument>> {
     const { gallery } = body;
 
     const project = await this.projectService.findOne(id);
@@ -270,7 +293,7 @@ export class ProjectController {
     }
 
     /* Check if provided gallery images ids exists */
-    const fetchedGallery = await this.galleryService.findAll({ _id: { $in: gallery }})
+    const fetchedGallery = await this.galleryService.findAll({ _id: { $in: gallery } })
     if (fetchedGallery.length < gallery.length) {
       const notFoundGallery = [...gallery]
       fetchedGallery.forEach((GalleryImage) => {

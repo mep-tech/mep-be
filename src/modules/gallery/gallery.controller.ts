@@ -28,26 +28,28 @@ import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { GalleryService } from './gallery.service';
 import { ProjectImageDocument } from './schemas/Projectimage.schema';
 
+export const projectImagesDirectory = 'project-images';
+
 @ApiTags('Gallery')
 @Controller('gallery')
 export class GalleryController {
   constructor(
     private readonly galleryService: GalleryService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   @Post()
   @AuthGuard()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images', null, multerOptions))
-  async create(
+  async create (
     @Body() body: CreateGalleryDto,
     @UploadedFiles() images: Express.Multer.File[],
   ): Promise<IResponse<ProjectImageDocument[]>> {
 
     const uploadedGallery = await Promise.all(
       images.map(async (image) => {
-        const url = (await this.cloudinaryService.uploadImage(image, 'gallery'))
+        const url = (await this.cloudinaryService.uploadImage(image, projectImagesDirectory))
           .secure_url;
         return {
           url,
@@ -68,7 +70,7 @@ export class GalleryController {
 
   @Get()
   @UseInterceptors(PaginationInterceptor)
-  async findAll(
+  async findAll (
     @Query(new ValidationPipe({ transform: true })) pagination: PaginationDto
   ): Promise<IResponse<ProjectImageDocument[]>> {
     const data = await this.galleryService.findAll({}, pagination);
@@ -82,7 +84,7 @@ export class GalleryController {
 
   @Get(':id')
   @UsePipes(ParamObjectIdValidationPipe)
-  async findOne(
+  async findOne (
     @Param('id') id: string,
   ): Promise<IResponse<ProjectImageDocument>> {
     return {
@@ -96,7 +98,7 @@ export class GalleryController {
   @Delete(':id')
   @AuthGuard()
   @UsePipes(ParamObjectIdValidationPipe)
-  async remove(@Param('id') id: string): Promise<IResponse> {
+  async remove (@Param('id') id: string): Promise<IResponse> {
     const projectImage = await this.galleryService.findOne(id);
     if (!projectImage) {
       throw new HttpException(

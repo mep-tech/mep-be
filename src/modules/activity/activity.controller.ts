@@ -29,20 +29,22 @@ import { ActivityDocument } from './schemas/activity.schema';
 import { createActivityValidation } from './validations/createActivity.validation';
 import { updateActivityValidation } from './validations/updateActivity.validation';
 
+export const activitiesImageDirectory = "activities-images"
+
 @ApiTags('Activity')
 @Controller('activity')
 export class ActivityController {
   constructor(
     private readonly activityService: ActivityService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   @Post()
   @AuthGuard()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UsePipes(new CustomValidationPipe(createActivityValidation))
-  async create(
+  async create (
     @Body() body: CreateActivityDto,
     @UploadedFile() image: Express.Multer.File,
   ): Promise<IResponse<ActivityDocument>> {
@@ -58,7 +60,7 @@ export class ActivityController {
 
     const uploadedFile = await this.cloudinaryService.uploadImage(
       image,
-      'activities-image',
+      activitiesImageDirectory,
     );
     body.image = uploadedFile.secure_url;
 
@@ -72,7 +74,7 @@ export class ActivityController {
   }
 
   @Get()
-  async findAll(): Promise<IResponse<ActivityDocument[]>> {
+  async findAll (): Promise<IResponse<ActivityDocument[]>> {
     const data = await this.activityService.findAll()
 
     return {
@@ -84,7 +86,7 @@ export class ActivityController {
 
   @Get(':id')
   @UsePipes(ParamObjectIdValidationPipe)
-  async findOne(@Param('id') id: string): Promise<ActivityDocument>  {
+  async findOne (@Param('id') id: string): Promise<ActivityDocument> {
     const activity = await this.activityService.findOne(id)
     if (!activity) {
       throw new HttpException(`Activity with id ${id} not found`, HttpStatus.NOT_FOUND)
@@ -99,7 +101,7 @@ export class ActivityController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UsePipes(ParamObjectIdValidationPipe)
   @UsePipes(new CustomValidationPipe(updateActivityValidation))
-  async update(
+  async update (
     @Param('id') id: string,
     @Body() body: UpdateActivityDto,
     @UploadedFile() image: Express.Multer.File,
@@ -130,7 +132,7 @@ export class ActivityController {
       // Upload the activity image
       const uploadedFile = await this.cloudinaryService.uploadImage(
         image,
-        'activities-image',
+        activitiesImageDirectory,
       );
       body.image = uploadedFile.secure_url;
       // Delete the old uploaded image
@@ -150,7 +152,7 @@ export class ActivityController {
   @Delete(':id')
   @AuthGuard()
   @UsePipes(ParamObjectIdValidationPipe)
-  async remove(@Param('id') id: string): Promise<IResponse> {
+  async remove (@Param('id') id: string): Promise<IResponse> {
     const activity = await this.activityService.findOne(id);
     if (!activity) {
       throw new HttpException(

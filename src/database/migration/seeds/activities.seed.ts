@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Command } from 'nestjs-command';
 import path from 'path';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { activitiesImageDirectory } from 'src/modules/activity/activity.controller';
 import { ActivityService } from 'src/modules/activity/activity.service';
 import { CreateActivityDto } from 'src/modules/activity/dto/create-activity.dto';
 
@@ -10,13 +11,13 @@ export class ActivitySeed {
   constructor(
     private readonly activityService: ActivityService,
     private readonly cloudinaryService: CloudinaryService
-  ) {}
+  ) { }
 
   @Command({
     command: 'seed:activities',
     describe: 'seed activities',
   })
-  async seeds(): Promise<void> {
+  async seeds (): Promise<void> {
 
 
     const data: CreateActivityDto[] = [
@@ -106,7 +107,7 @@ export class ActivitySeed {
       const activities = await Promise.all(
         data.map(async (activity) => {
           const file = { path: activity.image }
-          const uploadedImage = await this.cloudinaryService.uploadImage(file)
+          const uploadedImage = await this.cloudinaryService.uploadImage(file, activitiesImageDirectory);
           return {
             ...activity,
             image: uploadedImage.secure_url
@@ -126,9 +127,9 @@ export class ActivitySeed {
     command: 'remove:activities',
     describe: 'remove activities',
   })
-  async remove(): Promise<void> {
+  async remove (): Promise<void> {
     try {
-     const activities = await this.activityService.findAll()
+      const activities = await this.activityService.findAll()
       const deleted = await this.activityService.removeMany(activities.flatMap((activity) => activity._id.toString()));
       console.log(`Deleted ${deleted.deletedCount} activities`)
     } catch (err: any) {
