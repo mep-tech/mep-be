@@ -29,4 +29,16 @@ export class CreateTestimonialDto {
   @IsOptional()
   @Type(() => String)
   readonly image?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  @Type(() => String)
+  readonly companyLogo?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  @Type(() => String)
+  readonly siteImage?: string;
 }
