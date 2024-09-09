@@ -40,6 +40,18 @@ export class Testimonial {
     type: String,
   })
   public image: string;
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  public companyLogo: string;
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  public siteImage: string;
 }
 
 export const testimonialSchema = SchemaFactory.createForClass(Testimonial);
