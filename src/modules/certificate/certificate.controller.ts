@@ -19,25 +19,28 @@ import { UpdateCertificateDto } from './dto/update-certificate.dto';
 import { multerOptions } from 'src/common/helpers/multer.helper';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
-import { UserAuthGuard } from '../auth/guards/auth.guard';
+import { CustomValidationPipe, ParamObjectIdValidationPipe } from 'src/common/pipes/validation.pipe';
+import { AuthGuard, UserAuthGuard } from '../auth/guards/auth.guard';
 import { IResponse } from 'src/common/interface/response.interface';
 import { CertificateDocument } from './schema/certificate.schema';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { createCertificateValidation } from './validations/certificate.validation';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Certificate')
 @Controller('certificate')
 export class CertificateController {
   constructor(
     private readonly certificateService: CertificateService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   @Post()
-  @UseGuards(UserAuthGuard, AdminGuard)
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UsePipes(new CustomValidationPipe(createCertificateValidation))
-  async create(
+  async create (
     @Body() createCertificateDto: CreateCertificateDto,
     @UploadedFile() image: Express.Multer.File,
   ): Promise<IResponse<CertificateDocument>> {
@@ -69,7 +72,7 @@ export class CertificateController {
   }
 
   @Get()
-  async findAll(): Promise<IResponse<CertificateDocument[]>> {
+  async findAll (): Promise<IResponse<CertificateDocument[]>> {
     try {
       const certificates = await this.certificateService.findAll();
       return {
@@ -86,7 +89,8 @@ export class CertificateController {
   }
 
   @Get(':id')
-  async findOne(
+  @UsePipes(ParamObjectIdValidationPipe)
+  async findOne (
     @Param('id') id: string,
   ): Promise<IResponse<CertificateDocument>> {
     try {
@@ -108,8 +112,11 @@ export class CertificateController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(FileInterceptor('image', multerOptions))
-  async update(
+  @UsePipes(ParamObjectIdValidationPipe)
+  async update (
     @Param('id') id: string,
     @Body() updateCertificateDto: UpdateCertificateDto,
     @UploadedFile() image: Express.Multer.File,
@@ -148,7 +155,9 @@ export class CertificateController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<void>> {
+  @AuthGuard()
+  @UsePipes(ParamObjectIdValidationPipe)
+  async remove (@Param('id') id: string): Promise<IResponse<void>> {
     try {
       const certificate = await this.certificateService.findOne(id);
       if (!certificate) {

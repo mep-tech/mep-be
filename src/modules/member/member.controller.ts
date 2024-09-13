@@ -15,17 +15,17 @@ import {
 } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { UserAuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard, UserAuthGuard } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/helpers/multer.helper';
-import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
+import { CustomValidationPipe, ParamObjectIdValidationPipe } from 'src/common/pipes/validation.pipe';
 import { memberValidation } from './validations/member.validation';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { IResponse } from 'src/common/interface/response.interface';
 import { MemberDocument } from './schema/member.schema';
 import { MemberService } from './member.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Member')
 @Controller('member')
@@ -33,13 +33,14 @@ export class MemberController {
   constructor(
     private readonly memberService: MemberService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   @Post()
-  @UseGuards(UserAuthGuard, AdminGuard)
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UsePipes(new CustomValidationPipe(memberValidation))
-  async create(
+  async create (
     @Body() createMemberDto: CreateMemberDto,
     @UploadedFile() image: Express.Multer.File,
   ): Promise<IResponse<MemberDocument>> {
@@ -78,7 +79,7 @@ export class MemberController {
   }
 
   @Get()
-  async findAll(): Promise<IResponse<MemberDocument[]>> {
+  async findAll (): Promise<IResponse<MemberDocument[]>> {
     try {
       const members = await this.memberService.findAll();
       return {
@@ -95,7 +96,8 @@ export class MemberController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<IResponse<MemberDocument>> {
+  @UsePipes(ParamObjectIdValidationPipe)
+  async findOne (@Param('id') id: string): Promise<IResponse<MemberDocument>> {
     try {
       const member = await this.memberService.findOne(id);
       if (!member) {
@@ -115,8 +117,11 @@ export class MemberController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(FileInterceptor('image', multerOptions))
-  async update(
+  @UsePipes(ParamObjectIdValidationPipe)
+  async update (
     @Param('id') id: string,
     @Body() updateMemberDto: UpdateMemberDto,
     @UploadedFile() image: Express.Multer.File,
@@ -200,7 +205,9 @@ export class MemberController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<void>> {
+  @AuthGuard()
+  @UsePipes(ParamObjectIdValidationPipe)
+  async remove (@Param('id') id: string): Promise<IResponse<void>> {
     try {
       const member = await this.memberService.findOne(id);
       if (!member) {

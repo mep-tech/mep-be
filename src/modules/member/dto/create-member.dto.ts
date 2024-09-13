@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDefined,
@@ -36,5 +37,6 @@ export class CreateMemberDto {
   @IsNotEmpty()
   @IsOptional()
   @Type(() => String)
+  @ApiProperty({ type: 'string', format: 'binary' })
   readonly image?: string;
 }

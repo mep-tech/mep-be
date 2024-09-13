@@ -3,9 +3,9 @@ import { Observable } from 'rxjs';
 
 export class ArrayInterceptor implements NestInterceptor {
   // This interceptor will convert a comma-separated string to an array of strings if the field is present in the fields array provided in the constructor.
-  constructor(private fields: string[]) {}
+  constructor(private fields: string[]) { }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept (context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const { body } = request;
     if (body) {

@@ -18,15 +18,15 @@ import { TestimonialService } from './testimonial.service';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { UserAuthGuard } from '../auth/guards/auth.guard';
+import { AuthGuard, UserAuthGuard } from '../auth/guards/auth.guard';
 import { IResponse } from 'src/common/interface/response.interface';
 import { TestimonialDocument } from './schema/testimonial.schema';
 import { multerOptions } from 'src/common/helpers/multer.helper';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { createTestimonialValidation } from './validations/testimonial.validation';
-import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
-import { ApiTags } from '@nestjs/swagger';
+import { CustomValidationPipe, ParamObjectIdValidationPipe } from 'src/common/pipes/validation.pipe';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Testimonial')
 @Controller('testimonial')
@@ -34,13 +34,14 @@ export class TestimonialController {
   constructor(
     private readonly testimonialService: TestimonialService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   @Post()
-  @UseGuards(UserAuthGuard, AdminGuard)
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   @UsePipes(new CustomValidationPipe(createTestimonialValidation))
-  async create(
+  async create (
     @Body() createTestimonialDto: CreateTestimonialDto,
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<any> {
@@ -87,7 +88,7 @@ export class TestimonialController {
   }
 
   @Get()
-  async findAll(): Promise<IResponse<TestimonialDocument[]>> {
+  async findAll (): Promise<IResponse<TestimonialDocument[]>> {
     try {
       const testimonials = await this.testimonialService.findAll();
       return {
@@ -104,7 +105,8 @@ export class TestimonialController {
   }
 
   @Get(':id')
-  async findOne(
+  @UsePipes(ParamObjectIdValidationPipe)
+  async findOne (
     @Param('id') id: string,
   ): Promise<IResponse<TestimonialDocument>> {
     try {
@@ -126,8 +128,11 @@ export class TestimonialController {
   }
 
   @Patch(':id')
+  @ApiConsumes('multipart/form-data')
+  @AuthGuard()
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
-  async update(
+  @UsePipes(ParamObjectIdValidationPipe)
+  async update (
     @Param('id') id: string,
     @Body() updateTestimonialDto: UpdateTestimonialDto,
     @UploadedFile() files: Express.Multer.File[],
@@ -202,7 +207,9 @@ export class TestimonialController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<IResponse<void>> {
+  @AuthGuard()
+  @UsePipes(ParamObjectIdValidationPipe)
+  async remove (@Param('id') id: string): Promise<IResponse<void>> {
     try {
       const testimonial = await this.testimonialService.findOne(id);
       if (!testimonial) {

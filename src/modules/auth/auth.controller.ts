@@ -14,7 +14,7 @@ import { PasswordHelper } from 'src/common/helpers/password.helper';
 import { ApiTags } from '@nestjs/swagger';
 import { AdminService } from '../admin/admin.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
+import { CustomValidationPipe, ParamObjectIdValidationPipe } from 'src/common/pipes/validation.pipe';
 import { authLoginValidation } from './validations/auth.validation';
 import { NodeMailerHelper } from 'src/common/helpers/nodemailer.helper';
 import { render } from '@react-email/components';
@@ -38,11 +38,11 @@ export class AuthController {
     private readonly adminService: AdminService,
     private readonly passwordHelper: PasswordHelper,
     private readonly nodeMailerHelper: NodeMailerHelper,
-  ) {}
+  ) { }
 
   @Post('login')
   @UsePipes(new CustomValidationPipe(authLoginValidation))
-  async login(
+  async login (
     @Body() authLoginDto: AuthLoginDto,
   ): Promise<IResponse<{ token: string; role?: string }>> {
     try {
@@ -82,7 +82,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @UsePipes(new CustomValidationPipe(passwordForgotValidation))
-  async forgotPassword(
+  async forgotPassword (
     @Body() passwordForgotDto: PasswordForgotDto,
   ): Promise<IResponse<{ message: string }>> {
     try {
@@ -127,7 +127,7 @@ export class AuthController {
 
   @Patch('reset-password/:token')
   @UsePipes(new CustomValidationPipe(passwordResetValidation))
-  async resetPassword(
+  async resetPassword (
     @Param('token') token: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<IResponse<AdminDocument>> {
@@ -167,8 +167,9 @@ export class AuthController {
   }
 
   @Patch('change-password/:id')
+  @UsePipes(ParamObjectIdValidationPipe)
   @UsePipes(new CustomValidationPipe(passwordChangeValidation))
-  async changePassword(
+  async changePassword (
     @Param('id') id: string,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<IResponse<AdminDocument>> {

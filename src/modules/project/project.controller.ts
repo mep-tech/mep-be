@@ -57,8 +57,8 @@ export class ProjectController {
   @ApiConsumes('multipart/form-data')
   @AuthGuard()
   @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'image' }, { name: 'gallery' }], multerOptions),
     new ArrayInterceptor(['activities']),
-    FileFieldsInterceptor([{ name: 'image' }, { name: 'gallery' }], multerOptions)
   )
   @UsePipes(new CustomValidationPipe(createProjectValidation))
   async create (

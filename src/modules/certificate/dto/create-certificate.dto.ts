@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDefined, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
@@ -18,5 +19,6 @@ export class CreateCertificateDto {
   @IsNotEmpty()
   @IsOptional()
   @Type(() => String)
-  readonly image?: string;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  readonly image: string;
 }

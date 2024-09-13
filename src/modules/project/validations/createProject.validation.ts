@@ -1,7 +1,7 @@
 import * as Joi from 'joi';
 
 export const createProjectValidation = Joi.object({
-  name: Joi.string().required().empty().max(40),
+  name: Joi.string().required().empty().max(100),
   projectOwner: Joi.string().required().empty().max(40),
   projectOwnerContact: Joi.string().empty().max(40),
 
@@ -16,7 +16,6 @@ export const createProjectValidation = Joi.object({
   gallery: Joi.array()
     .items(
       Joi.object({
-        originalname: Joi.string().required().empty().max(40),
         size: Joi.number().required().empty(),
         mimetype: Joi.string().required().empty().max(40),
       }),
