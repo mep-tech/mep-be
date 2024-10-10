@@ -4,11 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import swaggerInit from './doc/swagger';
 
-async function bootstrap () {
+async function bootstrap() {
   const app: NestApplication = await NestFactory.create(AppModule, {
     cors: {
       origin: [process.env.CLIENT_URL],
-    }
+    },
+  });
+  app.enableCors({
+    origin: ['http://localhost:3000', 'https://meperictrictech.com'],
   });
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
